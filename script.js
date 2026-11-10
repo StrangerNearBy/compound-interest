@@ -1,7 +1,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const form = $("calc");
-  const fields = ["lump", "sip", "years", "stay", "rate", "stepup"].reduce((o, id) => ((o[id] = $(id)), o), {});
+  const fields = ["lump", "sip", "years", "stay", "rate", "stepup", "stepAmt"].reduce((o, id) => ((o[id] = $(id)), o), {});
   const stepupOn = $("stepupOn");
   const freq = $("freq");
 
@@ -99,6 +99,7 @@
     const s = summarize(res);
 
     $("total").textContent = fmt(s.total);
+    $("totalWords").textContent = toWords(s.total);
     $("invested").textContent = fmt(s.invested);
     $("returns").textContent = (s.returns >= 0 ? "+" : "−") + fmt(Math.abs(s.returns));
     $("invPct").textContent = s.invPct + "%";
@@ -119,7 +120,8 @@
     years: Math.floor(parseNum(fields.years.value)),
     stay: Math.floor(parseNum(fields.stay.value)),
     rate: parseNum(fields.rate.value),
-    stepup: stepupOn.checked ? parseNum(fields.stepup.value) : 0,
+    stepup: stepupOn.checked && stepMode === "pct" ? parseNum(fields.stepup.value) : 0,
+    stepupAmt: stepupOn.checked && stepMode === "amt" ? parseNum(fields.stepAmt.value) : 0,
   });
 
   const validate = (v) => {
@@ -130,7 +132,7 @@
     if (v.stay < 1 || v.stay > 100) return fail("stay", "Stay-invested period must be between 1 and 100 years.");
     if (v.stay < v.years) return fail("stay", "Stay-invested period can't be shorter than the investment period.");
     if (v.rate > 50) return fail("rate", "Expected return must be 50% or lower.");
-    if (stepupOn.checked && v.stepup > 100) return fail("stepup", "Step-up must be 100% or lower.");
+    if (v.stepup > 100) return fail("stepup", "Annual increase must be 100% or lower.");
     return "";
   };
 
@@ -144,7 +146,13 @@
     const err = validate(v);
     showError(err);
     if (err) return;
-    render(calculate(v));
+    const res = calculate(v);
+    // Beyond 2^53 rupees, JavaScript numbers can't hold every digit exactly
+    if (res.total > Number.MAX_SAFE_INTEGER) {
+      showError("Result is too large to show accurately. Try a lower amount, rate or period.");
+      return;
+    }
+    render(res);
     setButton(true);
   };
 
@@ -156,12 +164,25 @@
 
   const markDirty = () => { if (calculated) setButton(false); };
 
-  ["lump", "sip"].forEach((id) =>
+  ["lump", "sip", "stepAmt"].forEach((id) =>
     fields[id].addEventListener("input", () => { formatMoneyInput(fields[id]); markDirty(); }));
   ["years", "stay"].forEach((id) =>
     fields[id].addEventListener("input", () => { sanitizeNumeric(fields[id], false); markDirty(); }));
-  ["rate", "stepup"].forEach((id) =>
-    fields[id].addEventListener("input", () => { sanitizeNumeric(fields[id], true); markDirty(); }));
+  fields.rate.addEventListener("input", () => { sanitizeNumeric(fields.rate, true); markDirty(); });
+
+  /* ---------- Step-up: by % or by fixed amount ---------- */
+  let stepMode = "pct";
+
+  document.querySelectorAll(".seg-btn").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      stepMode = btn.dataset.mode;
+      document.querySelectorAll(".seg-btn").forEach((b) => b.classList.toggle("active", b === btn));
+      $("stepPct").hidden = stepMode !== "pct";
+      $("stepAmtBox").hidden = stepMode !== "amt";
+      markDirty();
+    }));
+
+  fields.stepup.addEventListener("input", () => { sanitizeNumeric(fields.stepup, true); markDirty(); });
   freq.addEventListener("change", markDirty);
 
   stepupOn.addEventListener("change", () => {
@@ -174,10 +195,10 @@
       currency = btn.dataset.cur;
       document.querySelectorAll(".cur").forEach((b) => b.classList.toggle("active", b === btn));
       document.querySelectorAll(".sym").forEach((s) => (s.textContent = CURRENCIES[currency].symbol));
-      ["lump", "sip"].forEach((id) => formatMoneyInput(fields[id]));
+      ["lump", "sip", "stepAmt"].forEach((id) => formatMoneyInput(fields[id]));
       if (calculated) run();
     }));
 
   // Init
-  ["lump", "sip"].forEach((id) => formatMoneyInput(fields[id]));
+  ["lump", "sip", "stepAmt"].forEach((id) => formatMoneyInput(fields[id]));
 })();

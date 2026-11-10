@@ -3,9 +3,9 @@
      so every full year grows by exactly R. Periodic contributions are made at the start of
      each contribution period, i.e. FV = P × [((1 + r)^n − 1) / r] × (1 + r), during the
      investment term; the corpus then keeps compounding
-     until the end of the stay-invested term. Step-up raises the contribution by a fixed %
-     at the start of every new year. */
-  function calculate({ lump, sip, every, years, stay, rate, stepup }) {
+     until the end of the stay-invested term. Step-up raises the contribution at the start of
+     every new year, by a % (stepup) or a fixed amount (stepupAmt). */
+  function calculate({ lump, sip, every, years, stay, rate, stepup, stepupAmt = 0 }) {
     const r = Math.pow(1 + rate / 100, 1 / 12) - 1;
     const investMonths = years * 12;
     const totalMonths = stay * 12;
@@ -16,7 +16,7 @@
     for (let m = 1; m <= totalMonths; m++) {
       if (m <= investMonths && (m - 1) % every === 0) {
         const yearIdx = Math.floor((m - 1) / 12);
-        const amt = sip * Math.pow(1 + stepup / 100, yearIdx);
+        const amt = sip * Math.pow(1 + stepup / 100, yearIdx) + stepupAmt * yearIdx;
         balance += amt;
         invested += amt;
       }

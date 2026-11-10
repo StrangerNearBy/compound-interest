@@ -67,11 +67,25 @@
           </label>
         </div>
         <div class="stepup-extra" hidden>
-          <div class="input">
-            <input id="stepup" inputmode="decimal" autocomplete="off" value="10" />
-            <span class="unit">% per year</span>
+          <div class="seg">
+            <button type="button" class="seg-btn active" data-mode="pct">By Percentage (%)</button>
+            <button type="button" class="seg-btn" data-mode="amt">By Fixed Amount (<span class="sym">₹</span>)</button>
           </div>
-        </div>
+          <div id="stepPct">
+            <div class="range-head"><label for="stepup">Annual Increase Rate</label></div>
+            <div class="input">
+              <input id="stepup" inputmode="decimal" autocomplete="off" value="10" />
+              <span class="unit">%</span>
+            </div>
+          </div>
+          <div id="stepAmtBox" hidden>
+            <div class="range-head"><label for="stepAmt">Annual Increase Amount</label></div>
+            <div class="input money">
+              <span class="sym">₹</span>
+              <input id="stepAmt" inputmode="numeric" autocomplete="off" value="1,000" />
+            </div>
+            <p class="words" data-for="stepAmt"></p>
+          </div>        </div>
       </div>
 
       <div class="field">
@@ -127,6 +141,7 @@
           <span class="pill dark" id="multiple"></span>
         </div>
         <div class="maturity-value" id="total"></div>
+        <div class="maturity-words" id="totalWords"></div>
       </div>
 
       <div class="split">

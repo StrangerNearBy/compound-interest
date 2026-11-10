@@ -152,3 +152,46 @@ test("11. Currency digit grouping", () => {
   assert.equal((2119532).toLocaleString("en-US"), "2,119,532");
   assert.equal((1514532).toLocaleString("en-IN"), "15,14,532");
 });
+
+/* Hard cases. Expected values: published real-world figures where they exist, otherwise an
+   independent 60-digit Python Decimal implementation of the same formula. */
+const HARD = [
+  ["H1. Groww example: ₹1,000/month, 12 months, 12% (published ≈ ₹12,766)",
+    { sip: 1000, years: 1, stay: 1, rate: 12 }, 12766.497908353178, 12000],
+  ["H2. Textbook: ₹1,00,000 at 12% for 10y = 1.12^10 (₹3,10,584.82)",
+    { lump: 100000, stay: 10, rate: 12 }, 310584.820834420916, 100000],
+  ["H3. Textbook: ₹10,000 at 8% for 30y = 1.08^30 (₹1,00,626.57)",
+    { lump: 10000, stay: 30, rate: 8 }, 100626.568890734301, 10000],
+  ["H4. Rule of 72: ₹1,00,000 at 7.2% roughly doubles in 10y",
+    { lump: 100000, stay: 10, rate: 7.2 }, 200423.136165433737, 100000],
+  ["H5. PPF: ₹1,50,000/year for 15y at 7.1% (published ₹40,68,209)",
+    { sip: 150000, every: 12, years: 15, stay: 15, rate: 7.1 }, 4068209.220288, 2250000],
+  ["H6. Quarterly ₹12,345, 7.5% step-up, 17y invest, 33y stay, 11.35%",
+    { sip: 12345, every: 3, years: 17, stay: 33, rate: 11.35, stepup: 7.5 }, 21460706.29099, 1592901.778729],
+  ["H7. ₹7,77,777 lump + ₹3,333/month, +₹2,500/yr fixed step-up, 37y invest, 41y stay, 13.7%",
+    { lump: 777777, sip: 3333, years: 37, stay: 41, rate: 13.7, stepupAmt: 2500 }, 524346532.410138, 22237629],
+  ["H8. 0% return, half-yearly ₹9,999 with 9.99% step-up for 25y: value = invested",
+    { sip: 9999, every: 6, years: 25, stay: 25, rate: 0, stepup: 9.99 }, 1963789.278288, 1963789.278288],
+  ["H9. Extreme: ₹99,99,99,99,99,999 lump at 50% for 100y",
+    { lump: 9999999999999, stay: 100, rate: 50 }, 4.065611775351745812795e30, 9999999999999],
+];
+
+for (const [name, input, expTotal, expInvested] of HARD) {
+  test(name, () => {
+    const res = run(input);
+    const rel = (a, b) => Math.abs(a - b) / Math.max(1, Math.abs(b));
+    assert.ok(rel(res.total, expTotal) < 1e-12, `total ${res.total} vs ${expTotal}`);
+    assert.ok(rel(res.invested, expInvested) < 1e-12, `invested ${res.invested} vs ${expInvested}`);
+    if (expTotal < 1e15) assert.equal(Math.round(res.total), Math.round(expTotal));
+  });
+}
+
+test("H10. Tiny: ₹1/month for 1y at 0.01% — paise-level growth, display rounds cleanly", () => {
+  const res = run({ sip: 1, years: 1, stay: 1, rate: 0.01 });
+  assert.ok(Math.abs(res.total - 12.00065) < 1e-6, `total ${res.total}`);
+  const s = summarize(res);
+  assert.deepEqual(
+    { total: s.total, invested: s.invested, returns: s.returns, invPct: s.invPct, retPct: s.retPct, gain: s.gainPct.toFixed(1) },
+    { total: 12, invested: 12, returns: 0, invPct: 100, retPct: 0, gain: "0.0" }
+  );
+});
