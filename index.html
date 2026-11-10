@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compound Interest Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="card">
+    <header class="card-head">
+      <div class="brand">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 3h2v16h16v2H3V3zm4 12l4-5 3 3 5-7v9H7z"/></svg>
+        </span>
+        <h1>Compound Interest</h1>
+      </div>
+      <div class="currency" role="tablist">
+        <button type="button" class="cur active" data-cur="INR">₹ INR</button>
+        <button type="button" class="cur" data-cur="USD">$ USD</button>
+      </div>
+    </header>
+
+    <form id="calc" class="card-body" novalidate>
+      <div class="field">
+        <label for="lump">Lump Sum you can invest today</label>
+        <div class="input money">
+          <span class="sym">₹</span>
+          <input id="lump" inputmode="numeric" autocomplete="off" value="5,000" />
+        </div>
+        <p class="words" data-for="lump"></p>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label for="sip">Amount you want to Invest</label>
+          <div class="freq">
+            <select id="freq" aria-label="Contribution frequency">
+              <option value="1">Monthly</option>
+              <option value="3">Quarterly</option>
+              <option value="6">Half-yearly</option>
+              <option value="12">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <div class="input money">
+          <span class="sym">₹</span>
+          <input id="sip" inputmode="numeric" autocomplete="off" value="5,000" />
+        </div>
+        <p class="words" data-for="sip"></p>
+      </div>
+
+      <div class="stepup">
+        <div class="stepup-row">
+          <span class="stepup-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+          </span>
+          <div class="stepup-text">
+            <strong>Annual Step-Up (Top-up)</strong>
+            <span>Increase investment each year</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="stepupOn" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="stepup-extra" hidden>
+          <div class="input">
+            <input id="stepup" inputmode="decimal" autocomplete="off" value="10" />
+            <span class="unit">% per year</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="years">Number of years you want to invest for</label>
+        <div class="input">
+          <input id="years" class="em" inputmode="numeric" autocomplete="off" value="10" />
+          <span class="unit">Years</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="stay">Number of years you want to stay invested for</label>
+        <div class="input">
+          <input id="stay" class="em" inputmode="numeric" autocomplete="off" value="15" />
+          <span class="unit">Years</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label for="rate">Expected Rate of return (p.a.)</label>
+          <span class="hint">Compounded annually</span>
+        </div>
+        <div class="input">
+          <input id="rate" inputmode="decimal" autocomplete="off" value="12" />
+          <span class="unit">%</span>
+        </div>
+      </div>
+
+      <p class="error" id="error" hidden></p>
+
+      <button type="submit" class="submit" id="submit">Submit</button>
+    </form>
+
+    <section class="results" id="empty">
+      <div class="empty">
+        <span class="empty-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        </span>
+        <p>Enter your investment details above and tap <b>Submit</b> to view your compound growth projection</p>
+      </div>
+    </section>
+
+    <section class="results" id="results" hidden>
+      <div class="res-head">
+        <span class="eyebrow">Investment Breakdown</span>
+        <span class="pill green" id="pctGain"></span>
+      </div>
+
+      <div class="maturity">
+        <div class="maturity-top">
+          <span>Total Future Value (Maturity)</span>
+          <span class="pill dark" id="multiple"></span>
+        </div>
+        <div class="maturity-value" id="total"></div>
+      </div>
+
+      <div class="split">
+        <div class="tile">
+          <div class="tile-top"><span class="dot gray"></span>Invested Capital<span class="pill gray" id="invPct"></span></div>
+          <div class="tile-value" id="invested"></div>
+        </div>
+        <div class="tile green">
+          <div class="tile-top"><span class="dot green"></span>Est. Returns<span class="pill green" id="retPct"></span></div>
+          <div class="tile-value" id="returns"></div>
+        </div>
+      </div>
+
+      <div class="bar"><span class="bar-inv" id="barInv"></span><span class="bar-ret"></span></div>
+
+      <div class="chart-card">
+        <div class="chart-head">
+          <span class="chart-title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 3h2v16h16v2H3V3zm4 12l4-5 3 3 5-7v9H7z"/></svg>
+            Relative Growth Projection
+          </span>
+          <span class="legend"><i class="lg gray"></i>Invested <i class="lg green"></i>Growth</span>
+        </div>
+        <svg id="chart" viewBox="0 0 320 120" preserveAspectRatio="none"></svg>
+        <div class="chart-x">
+          <span>Year 0</span><span id="xMid"></span><span id="xEnd"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="calc.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
