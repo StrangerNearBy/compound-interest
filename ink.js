@@ -215,9 +215,12 @@
       const inset = p.w / 2;
       let s = "";
       if (el.dataset.fill) {
-        const dx = (r() < 0.5 ? -1 : 1) * (1.2 + r() * 1.3), dy = 0.8 + r() * 1.2;
+        // Fills sit in register: tucked just under the outline, and the small offset
+        // (even doubled on hover) is less than the tuck, so color never crosses the line.
+        const tuck = p.w * 0.5 + 1.4;
+        const dx = (r() < 0.5 ? -1 : 1) * (0.5 + r() * 0.6), dy = 0.3 + r() * 0.5;
         s += `<g class="ll-fill" style="--dx:${dx.toFixed(2)};--dy:${dy.toFixed(2)}">` +
-          path(fillPath(2, 2, w - 4, h - 4, rad - 1, r), "--ll-" + el.dataset.fill, el.dataset.fillOpacity || 1) + "</g>";
+          path(fillPath(tuck, tuck, w - tuck * 2, h - tuck * 2, Math.max(1, rad - tuck / 2), r), "--ll-" + el.dataset.fill, el.dataset.fillOpacity || 1) + "</g>";
       }
       s += `<g class="ll-line">${path(boxPath(inset, inset, w - inset * 2, h - inset * 2, rad, r, p), p.c, p.o)}</g>`;
       if (el.hasAttribute("data-invalid")) {
@@ -230,9 +233,11 @@
 
     // Fill only (a selected tab), plus an optional focus ring
     fill(el, w, h, r) {
-      const dx = (r() < 0.5 ? -1 : 1) * (1 + r()), dy = 0.6 + r();
+      // A tab's fill stays inside the strip's outline and its dividers
+      const tuck = 2.4;
+      const dx = (r() < 0.5 ? -1 : 1) * (0.4 + r() * 0.5), dy = 0.3 + r() * 0.4;
       let s = `<g class="ll-fill" style="--dx:${dx.toFixed(2)};--dy:${dy.toFixed(2)}">` +
-        path(fillPath(1.5, 1.5, w - 3, h - 3, 3, r), "--ll-" + (el.dataset.fill || "hi"), el.dataset.fillOpacity || 1) + "</g>";
+        path(fillPath(tuck, tuck, w - tuck * 2, h - tuck * 2, 3, r), "--ll-" + (el.dataset.fill || "hi"), el.dataset.fillOpacity || 1) + "</g>";
       if (el.hasAttribute("data-focus")) s += focusRing(w, h, 6, r);
       return s;
     },

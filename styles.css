@@ -309,6 +309,7 @@ label { display: block; font-size: 16px; margin-bottom: 6px; }
 
 /* ---------- Step-up slip ---------- */
 .stepup { padding: 16px 16px 18px; margin: 6px 0 22px; }
+.stepup::before { border-radius: 8px; } /* the paper follows its drawn outline */
 .stepup-row { display: flex; align-items: center; gap: 14px; }
 .stepup-text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
 .stepup-title { font-size: 18px; font-weight: 700; }
@@ -358,7 +359,7 @@ label { display: block; font-size: 16px; margin-bottom: 6px; }
 .btn:focus-visible > .ll-ink .ll-focus { opacity: 1; }
 /* Hover: the fill drifts further off and the drawing turns a hair. Press: it snaps into register. */
 .btn:hover > .ll-ink { transform: rotate(var(--ll-hover-tilt)); }
-.btn:hover > .ll-ink .ll-fill { transform: translate(calc(var(--dx) * var(--ll-misreg-k) * 1.8px), calc(var(--dy) * var(--ll-misreg-k) * 1.8px)); }
+.btn:hover > .ll-ink .ll-fill { transform: translate(calc(var(--dx) * var(--ll-misreg-k) * 2px), calc(var(--dy) * var(--ll-misreg-k) * 2px)); }
 .btn:active > .ll-ink { transform: none; transition-duration: var(--ll-dur-press); }
 .btn:active > .ll-ink .ll-fill { transform: none; transition-duration: var(--ll-dur-press); }
 
