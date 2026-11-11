@@ -194,6 +194,79 @@
 
   const press = (b, on) => { b.classList.toggle("active", on); b.setAttribute("aria-pressed", String(on)); };
 
+  /* ---------- Drawn dropdown (listbox) over the native select ---------- */
+  const dropdown = (wrap) => {
+    const native = wrap.querySelector("select");
+    const trigger = wrap.querySelector(".select-trigger");
+    const list = wrap.querySelector('[role="listbox"]');
+    const valueEl = wrap.querySelector(".select-value");
+    const opts = [...list.querySelectorAll('[role="option"]')];
+    let active = 0;
+
+    const selectedIndex = () => opts.findIndex((o) => o.dataset.value === native.value);
+    const setActive = (i) => {
+      active = (i + opts.length) % opts.length;
+      opts.forEach((o, k) => o.classList.toggle("is-active", k === active));
+      list.setAttribute("aria-activedescendant", opts[active].id);
+    };
+    const open = () => {
+      list.hidden = false;
+      // Open toward whichever side has room, so the slip never runs off the screen
+      list.classList.remove("align-start");
+      if (list.getBoundingClientRect().left < 8) list.classList.add("align-start");
+      trigger.setAttribute("aria-expanded", "true");
+      setActive(Math.max(0, selectedIndex()));
+      Ink.mount(list); // the slip has a size now: draw its outline and the highlighter fills
+      list.focus();
+    };
+    const close = (refocus) => {
+      if (list.hidden) return;
+      list.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+      if (refocus) trigger.focus();
+    };
+    const choose = (i) => {
+      const o = opts[i];
+      opts.forEach((x) => x.setAttribute("aria-selected", String(x === o)));
+      valueEl.textContent = o.querySelector(".opt-label").textContent;
+      if (native.value !== o.dataset.value) {
+        native.value = o.dataset.value;
+        native.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      close(true);
+    };
+
+    trigger.addEventListener("click", () => (list.hidden ? open() : close(true)));
+    trigger.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); open(); }
+    });
+    opts.forEach((o, i) => {
+      o.addEventListener("pointermove", () => setActive(i));
+      o.addEventListener("click", () => choose(i));
+    });
+    list.addEventListener("keydown", (e) => {
+      const k = e.key;
+      if (k === "ArrowDown") setActive(active + 1);
+      else if (k === "ArrowUp") setActive(active - 1);
+      else if (k === "Home") setActive(0);
+      else if (k === "End") setActive(opts.length - 1);
+      else if (k === "Enter" || k === " ") choose(active);
+      else if (k === "Escape") close(true);
+      else if (k === "Tab") { close(false); return; }
+      else if (k.length === 1 && /\S/.test(k)) {
+        // Type a letter to jump to the next option starting with it
+        const start = active + 1;
+        const hit = opts.map((_, n) => (start + n) % opts.length)
+          .find((n) => opts[n].textContent.trim().toLowerCase().startsWith(k.toLowerCase()));
+        if (hit != null) setActive(hit);
+      } else return;
+      e.preventDefault();
+    });
+    list.addEventListener("focusout", (e) => { if (!wrap.contains(e.relatedTarget)) close(false); });
+    document.addEventListener("pointerdown", (e) => { if (!wrap.contains(e.target)) close(false); });
+  };
+  dropdown($("freqSelect"));
+
   /* ---------- Step-up: by % or by fixed amount ---------- */
   let stepMode = "pct";
 

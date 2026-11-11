@@ -273,7 +273,8 @@
       const p = pen(el.dataset.pen || "ink");
       const y = h - p.w;
       const pts = densify([[0, y + (r() - 0.5)], [w * 0.55, y + (r() - 0.5) * 1.2], [w, y + (r() - 0.5)]], 2.5);
-      return path(ribbon(wander(pts, r, 0.5 * p.wobble, false), p.w, r, { press: p.press, start: "soft", end: "flick" }), p.c, p.o);
+      const line = path(ribbon(wander(pts, r, 0.5 * p.wobble, false), p.w, r, { press: p.press, start: "soft", end: "flick" }), p.c, p.o);
+      return el.hasAttribute("data-focus") ? line + focusRing(w, h, 6, r) : line;
     },
 
     // A swipe of yellow highlighter behind words
@@ -304,6 +305,13 @@
       const p = pen("red"), m = w * 0.18;
       const s1 = densify([[m, m], [w - m, h - m]], 1.5), s2 = densify([[w - m, m + 0.5], [m + 0.5, h - m]], 1.5);
       return path(ribbon(s1, p.w * 1.2, r, { start: "pool", end: "flick" }), p.c) + path(ribbon(s2, p.w * 1.2, r, { start: "pool", end: "flick" }), p.c);
+    },
+
+    // A tick: a short down-stroke and a long flick up, in green pencil
+    check(el, w, h, r) {
+      const p = pen("green");
+      const pts = densify([[w * 0.12, h * 0.52], [w * 0.4, h * 0.8], [w * 0.9, h * 0.16]], 1.2);
+      return path(ribbon(pts, p.w * 1.3, r, { press: 0.15, start: "pool", end: "flick" }), p.c, 0.95);
     },
 
     chevron(el, w, h, r) {

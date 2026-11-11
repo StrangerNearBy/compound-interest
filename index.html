@@ -47,14 +47,33 @@
         <div class="field">
           <div class="label-row">
             <label for="sip">Amount you want to invest</label>
-            <div class="freq" data-ink="rule" data-pen="ink.fine">
-              <select id="freq" aria-label="Contribution frequency">
+            <!-- A drawn dropdown. The native select stays underneath as the value the calculator reads. -->
+            <div class="select" id="freqSelect">
+              <select id="freq" class="native" tabindex="-1" aria-hidden="true">
                 <option value="1">Monthly</option>
                 <option value="3">Quarterly</option>
                 <option value="6">Half-yearly</option>
                 <option value="12">Yearly</option>
               </select>
-              <span class="icon" data-ink="chevron" aria-hidden="true"></span>
+              <span class="sr-only" id="freqName">Contribution frequency</span>
+              <button type="button" class="select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="freqList" aria-labelledby="freqName freqValue" data-ink="rule" data-pen="ink.fine" data-focus>
+                <span class="select-value" id="freqValue">Monthly</span>
+                <span class="icon" data-ink="chevron" aria-hidden="true"></span>
+              </button>
+              <ul class="select-menu" id="freqList" role="listbox" tabindex="-1" aria-labelledby="freqName" data-ink="box" data-pen="ink.fine" data-r="8" hidden>
+                <li role="option" id="freq-opt-1" data-value="1" aria-selected="true" data-ink="fill">
+                  <span class="opt-label">Monthly</span><span class="opt-check" data-ink="check" aria-hidden="true"></span>
+                </li>
+                <li role="option" id="freq-opt-3" data-value="3" aria-selected="false" data-ink="fill">
+                  <span class="opt-label">Quarterly</span><span class="opt-check" data-ink="check" aria-hidden="true"></span>
+                </li>
+                <li role="option" id="freq-opt-6" data-value="6" aria-selected="false" data-ink="fill">
+                  <span class="opt-label">Half-yearly</span><span class="opt-check" data-ink="check" aria-hidden="true"></span>
+                </li>
+                <li role="option" id="freq-opt-12" data-value="12" aria-selected="false" data-ink="fill">
+                  <span class="opt-label">Yearly</span><span class="opt-check" data-ink="check" aria-hidden="true"></span>
+                </li>
+              </ul>
             </div>
           </div>
           <div class="input money" data-ink="box" data-pen="pencil" data-invalid data-focus>
