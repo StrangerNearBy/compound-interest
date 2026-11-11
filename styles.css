@@ -437,18 +437,19 @@ label { display: block; font-size: 16px; margin-bottom: 6px; }
   font-weight: 700;
   font-size: clamp(44px, 8vw, 58px);
   line-height: 1.15;
-  overflow-wrap: anywhere;
+  white-space: nowrap; /* a number never breaks; script.js shrinks it to fit instead */
 }
-.maturity-words { margin: 0; }
+.maturity-short { margin: 2px 0 0; font-size: 18px; font-weight: 700; color: var(--ll-ink-soft); }
+.maturity-words { margin: 2px 0 0; font-size: 14px; line-height: 1.45; color: var(--ll-pencil-text); }
 .gain { margin: 14px 0 0; font-size: 17px; }
-.circled { display: inline-block; margin: 0 6px; }
+.circled { display: inline-block; margin: 0 10px; }
 .gain b { color: var(--ll-green); font-weight: 700; }
 
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
 .tile { padding: 12px 14px 14px; background: color-mix(in srgb, var(--ll-photo) 70%, transparent); border-radius: 8px; }
 .tile-top { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ll-ink-muted); }
 .pct { margin-left: auto; font-weight: 700; color: var(--ll-ink); }
-.tile-value { margin-top: 6px; font-size: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.tile-value { margin-top: 6px; font-size: 22px; font-weight: 700; white-space: nowrap; }
 
 /* Series never ride on color alone: invested is a blue pencil hatch, value is solid marker */
 .hatch { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--ll-ink-you) 60%, transparent) 0 1.4px, transparent 1.4px 5px), var(--ll-photo); }
@@ -470,6 +471,8 @@ label { display: block; font-size: 16px; margin-bottom: 6px; }
 .chart-x span:first-child { left: 0; }
 .chart-x #xMid { transform: translateX(-50%); }
 .chart-x #xEnd { right: 0; }
+/* A pencil note in the margin of the chart */
+.chart-note { margin: 8px 0 2px; padding-top: 8px; border-top: 1px dashed color-mix(in srgb, var(--ll-pencil-mark) 60%, transparent); font-size: 14px; line-height: 1.45; color: var(--ll-pencil-text); }
 
 /* ---------- Motion: short, physical, off when asked ---------- */
 @keyframes ll-drop { from { opacity: 0; transform: translateY(-14px) scale(1.015); } to { opacity: 1; transform: none; } }

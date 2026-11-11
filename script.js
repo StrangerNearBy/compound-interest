@@ -26,6 +26,19 @@
 
   const toWords = (num) => window.CompoundCalc.toWords(num, currency);
 
+  /* A quick read of a big total: "About ₹407.25 crore" or "About $3.42 million".
+     Empty below a lakh / a million, where the figure is easy to read as it is. */
+  const shortForm = (n) => {
+    const c = CURRENCIES[currency];
+    const units = currency === "INR"
+      ? [[1e7, "crore"], [1e5, "lakh"]]
+      : [[1e12, "trillion"], [1e9, "billion"], [1e6, "million"]];
+    const hit = units.find(([v]) => n >= v);
+    if (!hit) return "";
+    const amount = (n / hit[0]).toLocaleString(c.locale, { maximumFractionDigits: 2 });
+    return `About ${c.symbol}${amount} ${hit[1]}`;
+  };
+
   /* ---------- Input formatting ---------- */
   const formatMoneyInput = (input) => {
     const raw = input.value.replace(/[^0-9]/g, "").slice(0, 13);
@@ -117,23 +130,59 @@
     const s = summarize(res);
 
     $("total").textContent = fmt(s.total);
+    $("totalShort").textContent = shortForm(s.total);
+    $("totalShort").hidden = !$("totalShort").textContent;
     $("totalWords").textContent = toWords(s.total);
     $("invested").textContent = fmt(s.invested);
     $("returns").textContent = (s.returns >= 0 ? "+" : "−") + fmt(Math.abs(s.returns));
-    $("invPct").textContent = s.invPct + "%";
-    $("retPct").textContent = s.retPct + "%";
-    $("pctGain").textContent = (s.gainPct >= 0 ? "+" : "") + s.gainPct.toFixed(1) + "%";
-    $("multiple").textContent = s.multiple.toFixed(2) + "x";
-    $("barInv").style.width = s.invPct + "%";
+    // A real share that rounds to 0% or 100% reads as "<1%" / ">99%", never a false 0%
+    const share = (pct, amount) => (amount > 0 && pct === 0 ? "<1%" : amount > 0 && pct === 100 && s.total > amount ? ">99%" : pct + "%");
+    $("invPct").textContent = share(s.invPct, s.invested);
+    $("retPct").textContent = share(s.retPct, s.returns);
+    // Group big figures the same way as the money (en-IN lakh/crore commas, or en-US)
+    const loc = CURRENCIES[currency].locale;
+    $("pctGain").textContent = (s.gainPct >= 0 ? "+" : "") +
+      s.gainPct.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+    $("multiple").textContent = (s.multiple >= 100
+      ? Math.round(s.multiple).toLocaleString(loc)
+      : s.multiple.toFixed(2)) + "x";
+    // The bar uses the exact share, but each part that exists keeps at least a visible sliver
+    const invShare = s.total ? (s.invested / s.total) * 100 : 0;
+    const barPct = s.invested > 0 && s.returns > 0 ? Math.min(98, Math.max(2, invShare)) : invShare;
+    $("barInv").style.width = barPct + "%";
+    // When invested is too small to see on the chart, say so in a margin note
+    $("chartNote").hidden = !(s.invested > 0 && invShare < 5);
+    $("chartNote").textContent = `Invested (${fmt(s.invested)}) is ${invShare < 1 ? "less than 1%" : "only about " + Math.round(invShare) + "%"} of the total, so its line sits near the bottom.`;
     $("empty").hidden = true;
     $("results").hidden = false;
     Ink.mount($("results")); // draw the sheet's marks now that it has a size
     drawChart(res.points); // after unhiding, so the chart can measure its width
+    fitNumbers();
     if (animate) replay($("results"), "is-new");
   };
 
   let lastPoints = null;
-  window.addEventListener("resize", () => { if (lastPoints) drawChart(lastPoints); });
+  /* Numbers never wrap mid-figure: if one is wider than its box, step its size down
+     (to no less than 55% of the designed size) until it fits on one line. */
+  const fit = (el) => {
+    el.style.fontSize = "";
+    const base = parseFloat(getComputedStyle(el).fontSize), min = base * 0.55;
+    // Measure the number itself, not the highlighter drawn a little past its ends
+    const hl = el.querySelector(".hl");
+    const tooWide = () => (hl ? hl.offsetWidth : el.scrollWidth) > el.clientWidth + 0.5;
+    let size = base;
+    while (tooWide() && size > min) {
+      size -= 1;
+      el.style.fontSize = size + "px";
+    }
+  };
+  const fitNumbers = () => {
+    if ($("results").hidden) return;
+    document.querySelectorAll(".maturity-value, .tile-value").forEach(fit);
+  };
+
+  window.addEventListener("resize", () => { if (lastPoints) { drawChart(lastPoints); fitNumbers(); } });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNumbers);
 
   const readInputs = () => ({
     lump: parseNum(fields.lump.value),
