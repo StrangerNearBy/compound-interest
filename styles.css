@@ -260,6 +260,10 @@ label { display: block; font-size: 16px; margin-bottom: 6px; }
 .label-row .muted { white-space: nowrap; }
 
 .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+/* Subgrid keeps the two inputs level even when a label or hint wraps */
+.pair .field { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
+.pair label { align-self: end; }
+.hint { margin: 5px 0 0; font-size: 14px; line-height: 1.4; color: var(--ll-pencil-text); }
 
 .input {
   display: flex;

@@ -101,18 +101,20 @@
 
         <div class="pair">
           <div class="field">
-            <label for="years">Invest for</label>
+            <label for="years">Years you add money</label>
             <div class="input" data-ink="box" data-pen="pencil" data-invalid data-focus>
-              <input id="years" inputmode="numeric" autocomplete="off" value="10" />
+              <input id="years" inputmode="numeric" autocomplete="off" value="10" aria-describedby="years-hint" />
               <span class="unit">years</span>
             </div>
+            <p class="hint" id="years-hint">After this, no new money goes in.</p>
           </div>
           <div class="field">
-            <label for="stay">Stay invested for</label>
+            <label for="stay">Total years invested</label>
             <div class="input" data-ink="box" data-pen="pencil" data-invalid data-focus>
-              <input id="stay" inputmode="numeric" autocomplete="off" value="15" />
+              <input id="stay" inputmode="numeric" autocomplete="off" value="15" aria-describedby="stay-hint" />
               <span class="unit">years</span>
             </div>
+            <p class="hint" id="stay-hint">Counted from today, including the years you add money.</p>
           </div>
         </div>
 

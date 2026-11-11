@@ -150,9 +150,9 @@
     document.querySelectorAll(".input.invalid").forEach((el) => el.classList.remove("invalid"));
     const fail = (id, msg) => { fields[id].closest(".input").classList.add("invalid"); return msg; };
     if (v.lump <= 0 && v.sip <= 0) return fail("lump", "Enter a lump sum or a periodic investment amount.");
-    if (v.sip > 0 && v.years < 1) return fail("years", "Investment period must be at least 1 year.");
-    if (v.stay < 1 || v.stay > 100) return fail("stay", "Stay-invested period must be between 1 and 100 years.");
-    if (v.stay < v.years) return fail("stay", "Stay-invested period can't be shorter than the investment period.");
+    if (v.sip > 0 && v.years < 1) return fail("years", "Years you add money must be at least 1.");
+    if (v.stay < 1 || v.stay > 100) return fail("stay", "Total years invested must be between 1 and 100.");
+    if (v.stay < v.years) return fail("stay", "Total years invested can't be less than the years you add money.");
     if (v.rate > 50) return fail("rate", "Expected return must be 50% or lower.");
     if (v.stepup > 100) return fail("stepup", "Annual increase must be 100% or lower.");
     return "";
