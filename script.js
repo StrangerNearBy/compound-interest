@@ -9,7 +9,7 @@
     INR: { symbol: "₹", locale: "en-IN", rate: 1 },
     USD: { symbol: "$", locale: "en-US", rate: 1 },
   };
-  const submitBtn = $("submit");
+  const submitLabel = $("submitLabel");
   let currency = "INR";
   let calculated = false;
 
@@ -54,48 +54,66 @@
   /* ---------- Rendering ---------- */
   const setButton = (done) => {
     calculated = done;
-    submitBtn.textContent = done ? "Calculated!" : "Submit";
+    submitLabel.textContent = done ? "Calculated!" : "Submit";
   };
 
   const drawChart = (points) => {
     const svg = $("chart");
-    const W = 320, H = 120, padT = 8, padB = 4;
+    lastPoints = points;
+    // Draw at the real pixel size so marks keep their shape
+    const W = Math.round(svg.clientWidth) || 320, H = Math.round(svg.clientHeight) || 150, padT = 12, padB = 4, padR = 6;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     const maxV = Math.max(...points.map((p) => p.value)) || 1;
     const n = points.length - 1 || 1;
-    const x = (i) => (i / n) * W;
+    const x = (i) => (i / n) * (W - padR);
     const y = (v) => padT + (H - padT - padB) * (1 - v / maxV);
-
-    const line = (key) => points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(2)},${y(p[key]).toFixed(2)}`).join(" ");
-    const area = (key) => `${line(key)} L${W},${H} L0,${H} Z`;
+    const pts = (key) => points.map((p, i) => [x(i), y(p[key])]);
+    const poly = (key) => `M${pts(key).map((q) => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L")}L${W - padR} ${H}L0 ${H}Z`;
     const last = points[points.length - 1];
 
-    const grid = [0.25, 0.5, 0.75].map((f) =>
-      `<line x1="0" x2="${W}" y1="${padT + (H - padT - padB) * f}" y2="${padT + (H - padT - padB) * f}" stroke="#eef2f7" stroke-width="1"/>`).join("");
+    // Lines are ribbons with pressure, seeded so a redraw is the same hand
+    const r = Ink.rng("chart");
+    const valuePen = Ink.pen("marker"), invPen = Ink.pen("bluepencil");
+    const ribbon = (key, p, w) => Ink.ribbon(Ink.densify(pts(key), 3), w, r, { press: p.press, start: "pool", end: "soft" });
+    const dot = (cx, cy, rad, fill) =>
+      `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rad}" style="fill:var(${fill});stroke:var(--ll-ink);stroke-width:1.6"/>`;
+
+    // Pencil hairlines for the grid
+    const grid = [0.25, 0.5, 0.75].map((f) => {
+      const gy = padT + (H - padT - padB) * f;
+      return `<path d="${Ink.ribbon(Ink.densify([[0, gy], [W - padR, gy + (r() - 0.5)]], 4), 0.8, r, { press: 0.1, start: "soft", end: "soft" })}" style="fill:var(--ll-pencil-mark);fill-opacity:.45"/>`;
+    }).join("");
 
     svg.innerHTML = `
       <defs>
-        <linearGradient id="gGrow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#3fb67b" stop-opacity=".45"/>
-          <stop offset="1" stop-color="#3fb67b" stop-opacity=".05"/>
-        </linearGradient>
-        <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#94a3b8" stop-opacity=".35"/>
-          <stop offset="1" stop-color="#94a3b8" stop-opacity=".04"/>
-        </linearGradient>
+        <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="1.4" height="5" style="fill:var(--ll-ink-you);fill-opacity:.5"/>
+        </pattern>
       </defs>
       ${grid}
-      <path d="${area("value")}" fill="url(#gGrow)"/>
-      <path d="${area("invested")}" fill="url(#gInv)"/>
-      <path d="${line("value")}" fill="none" stroke="#3fb67b" stroke-width="2" vector-effect="non-scaling-stroke"/>
-      <path d="${line("invested")}" fill="none" stroke="#64748b" stroke-width="1.6" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>
-      <circle cx="${W}" cy="${y(last.value)}" r="3" fill="#3fb67b" stroke="#fff" stroke-width="1"/>
-      <circle cx="${W}" cy="${y(last.invested)}" r="2.6" fill="#64748b" stroke="#fff" stroke-width="1"/>`;
+      <g class="series">
+        <path d="${poly("value")}" style="fill:var(--ll-marker);fill-opacity:.2;mix-blend-mode:var(--ll-blend)"/>
+        <path d="${poly("invested")}" fill="url(#hatch)"/>
+        <path d="${ribbon("invested", invPen, invPen.w * 1.2)}" style="fill:var(${invPen.c})"/>
+        <path d="${ribbon("value", valuePen, valuePen.w)}" style="fill:var(${valuePen.c})"/>
+        ${dot(x(n), y(last.invested), 3.4, "--ll-photo")}
+        ${dot(x(n), y(last.value), 4.4, "--ll-marker")}
+      </g>`;
 
-    $("xMid").textContent = `Year ${Math.round(last.year / 2)}`;
     $("xEnd").textContent = `Year ${last.year} (Maturity)`;
+    const midYear = Math.round(last.year / 2);
+    $("xMid").textContent = `Year ${midYear}`;
+    $("xMid").style.left = `${(midYear / (last.year || 1)) * 100}%`;
+    $("xMid").hidden = midYear === 0 || midYear === last.year;
+    // On narrow screens the middle label can run into the end label; drop it if so
+    if (!$("xMid").hidden && $("xMid").getBoundingClientRect().right + 8 > $("xEnd").getBoundingClientRect().left) {
+      $("xMid").hidden = true;
+    }
   };
 
-  const render = (res) => {
+  const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+
+  const render = (res, animate) => {
     const s = summarize(res);
 
     $("total").textContent = fmt(s.total);
@@ -107,11 +125,15 @@
     $("pctGain").textContent = (s.gainPct >= 0 ? "+" : "") + s.gainPct.toFixed(1) + "%";
     $("multiple").textContent = s.multiple.toFixed(2) + "x";
     $("barInv").style.width = s.invPct + "%";
-    drawChart(res.points);
-
     $("empty").hidden = true;
     $("results").hidden = false;
+    Ink.mount($("results")); // draw the sheet's marks now that it has a size
+    drawChart(res.points); // after unhiding, so the chart can measure its width
+    if (animate) replay($("results"), "is-new");
   };
+
+  let lastPoints = null;
+  window.addEventListener("resize", () => { if (lastPoints) drawChart(lastPoints); });
 
   const readInputs = () => ({
     lump: parseNum(fields.lump.value),
@@ -141,7 +163,7 @@
     $("error").hidden = !msg;
   };
 
-  const run = () => {
+  const run = (animate) => {
     const v = readInputs();
     const err = validate(v);
     showError(err);
@@ -152,14 +174,14 @@
       showError("Result is too large to show accurately. Try a lower amount, rate or period.");
       return;
     }
-    render(res);
+    render(res, animate);
     setButton(true);
   };
 
   /* ---------- Events ---------- */
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    run();
+    run(true);
   });
 
   const markDirty = () => { if (calculated) setButton(false); };
@@ -170,13 +192,15 @@
     fields[id].addEventListener("input", () => { sanitizeNumeric(fields[id], false); markDirty(); }));
   fields.rate.addEventListener("input", () => { sanitizeNumeric(fields.rate, true); markDirty(); });
 
+  const press = (b, on) => { b.classList.toggle("active", on); b.setAttribute("aria-pressed", String(on)); };
+
   /* ---------- Step-up: by % or by fixed amount ---------- */
   let stepMode = "pct";
 
   document.querySelectorAll(".seg-btn").forEach((btn) =>
     btn.addEventListener("click", () => {
       stepMode = btn.dataset.mode;
-      document.querySelectorAll(".seg-btn").forEach((b) => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".seg-btn").forEach((b) => press(b, b === btn));
       $("stepPct").hidden = stepMode !== "pct";
       $("stepAmtBox").hidden = stepMode !== "amt";
       markDirty();
@@ -187,18 +211,20 @@
 
   stepupOn.addEventListener("change", () => {
     document.querySelector(".stepup-extra").hidden = !stepupOn.checked;
+    Ink.mount(document.querySelector(".stepup"));
     markDirty();
   });
 
   document.querySelectorAll(".cur").forEach((btn) =>
     btn.addEventListener("click", () => {
       currency = btn.dataset.cur;
-      document.querySelectorAll(".cur").forEach((b) => b.classList.toggle("active", b === btn));
+      document.querySelectorAll(".cur").forEach((b) => press(b, b === btn));
       document.querySelectorAll(".sym").forEach((s) => (s.textContent = CURRENCIES[currency].symbol));
       ["lump", "sip", "stepAmt"].forEach((id) => formatMoneyInput(fields[id]));
       if (calculated) run();
     }));
 
   // Init
+  Ink.init();
   ["lump", "sip", "stepAmt"].forEach((id) => formatMoneyInput(fields[id]));
 })();

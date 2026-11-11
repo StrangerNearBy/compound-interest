@@ -1,178 +1,192 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-density="comfortable">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#a8c8bb" />
   <title>Compound Interest Calculator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,700&display=swap" rel="stylesheet" />
+  <!-- Kevin Sans (MIT), the Looseleaf hand, loaded the way the Looseleaf docs describe -->
+  <link rel="stylesheet" href="https://kevintngo.github.io/looseleaf/fonts/kevin-sans.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46'%3E%3Crect x='6' y='3' width='30' height='40' rx='3' fill='%23fffdf6' stroke='%232a2420' stroke-width='3'/%3E%3Cpath d='M13 19h14' stroke='%23df6b3c' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M13 28h14' stroke='%232c4f9e' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <main class="card">
-    <header class="card-head">
-      <div class="brand">
-        <span class="brand-icon">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 3h2v16h16v2H3V3zm4 12l4-5 3 3 5-7v9H7z"/></svg>
-        </span>
-        <h1>Compound Interest</h1>
+<body class="ll-desk">
+  <header class="masthead">
+    <div class="brand">
+      <span class="doodle" data-ink="notebook" data-seed="brand" aria-hidden="true"></span>
+      <div>
+        <h1 class="ll-riso" data-handwritten data-seed="title">Compound <span class="hl" data-ink="hi" data-seed="title-hi">Interest</span> Calculator</h1>
       </div>
-      <div class="currency" role="tablist">
-        <button type="button" class="cur active" data-cur="INR">₹ INR</button>
-        <button type="button" class="cur" data-cur="USD">$ USD</button>
-      </div>
-    </header>
+    </div>
+  </header>
 
-    <form id="calc" class="card-body" novalidate>
-      <div class="field">
-        <label for="lump">Lump Sum you can invest today</label>
-        <div class="input money">
-          <span class="sym">₹</span>
-          <input id="lump" inputmode="numeric" autocomplete="off" value="5,000" />
+  <main class="desk">
+    <!-- Left sheet: the plan, on paper stock -->
+    <section class="sheet stock-paper" data-tilt="0.6" data-seed="plan" aria-labelledby="plan-title">
+      <span class="tape tape-corner" aria-hidden="true"></span>
+
+      <div class="sheet-head">
+        <h2 id="plan-title"><span class="ruled-title" data-ink="rule" data-pen="ink.brush">Your plan</span></h2>
+        <div class="tabs currency" role="group" aria-label="Currency" data-ink="tabs">
+          <button type="button" class="cur active" data-cur="INR" aria-pressed="true" data-ink="fill" data-focus>₹ INR</button>
+          <button type="button" class="cur" data-cur="USD" aria-pressed="false" data-ink="fill" data-focus>$ USD</button>
         </div>
-        <p class="words" data-for="lump"></p>
       </div>
 
-      <div class="field">
-        <div class="label-row">
-          <label for="sip">Amount you want to Invest</label>
-          <div class="freq">
-            <select id="freq" aria-label="Contribution frequency">
-              <option value="1">Monthly</option>
-              <option value="3">Quarterly</option>
-              <option value="6">Half-yearly</option>
-              <option value="12">Yearly</option>
-            </select>
+      <form id="calc" novalidate>
+        <div class="field">
+          <label for="lump">Lump sum you can invest today</label>
+          <div class="input money" data-ink="box" data-pen="pencil" data-invalid data-focus>
+            <span class="sym">₹</span>
+            <input id="lump" inputmode="numeric" autocomplete="off" value="5,000" />
           </div>
+          <p class="words" data-for="lump"></p>
         </div>
-        <div class="input money">
-          <span class="sym">₹</span>
-          <input id="sip" inputmode="numeric" autocomplete="off" value="5,000" />
-        </div>
-        <p class="words" data-for="sip"></p>
-      </div>
 
-      <div class="stepup">
-        <div class="stepup-row">
-          <span class="stepup-icon">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
-          </span>
-          <div class="stepup-text">
-            <strong>Annual Step-Up (Top-up)</strong>
-            <span>Increase investment each year</span>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="stepupOn" />
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="stepup-extra" hidden>
-          <div class="seg">
-            <button type="button" class="seg-btn active" data-mode="pct">By Percentage (%)</button>
-            <button type="button" class="seg-btn" data-mode="amt">By Fixed Amount (<span class="sym">₹</span>)</button>
-          </div>
-          <div id="stepPct">
-            <div class="range-head"><label for="stepup">Annual Increase Rate</label></div>
-            <div class="input">
-              <input id="stepup" inputmode="decimal" autocomplete="off" value="10" />
-              <span class="unit">%</span>
+        <div class="field">
+          <div class="label-row">
+            <label for="sip">Amount you want to invest</label>
+            <div class="freq" data-ink="rule" data-pen="ink.fine">
+              <select id="freq" aria-label="Contribution frequency">
+                <option value="1">Monthly</option>
+                <option value="3">Quarterly</option>
+                <option value="6">Half-yearly</option>
+                <option value="12">Yearly</option>
+              </select>
+              <span class="icon" data-ink="chevron" aria-hidden="true"></span>
             </div>
           </div>
-          <div id="stepAmtBox" hidden>
-            <div class="range-head"><label for="stepAmt">Annual Increase Amount</label></div>
-            <div class="input money">
-              <span class="sym">₹</span>
-              <input id="stepAmt" inputmode="numeric" autocomplete="off" value="1,000" />
+          <div class="input money" data-ink="box" data-pen="pencil" data-invalid data-focus>
+            <span class="sym">₹</span>
+            <input id="sip" inputmode="numeric" autocomplete="off" value="5,000" />
+          </div>
+          <p class="words" data-for="sip"></p>
+        </div>
+
+        <!-- Step-up lives on its own slip of paper -->
+        <div class="stepup sheet stock-slip" data-tilt="0.7" data-seed="slip">
+          <div class="stepup-row">
+            <div class="stepup-text">
+              <span class="stepup-title" id="stepup-title">Annual step-up</span>
+              <span class="muted">Raise what you invest every year</span>
             </div>
-            <p class="words" data-for="stepAmt"></p>
-          </div>        </div>
-      </div>
-
-      <div class="field">
-        <label for="years">Number of years you want to invest for</label>
-        <div class="input">
-          <input id="years" class="em" inputmode="numeric" autocomplete="off" value="10" />
-          <span class="unit">Years</span>
+            <label class="switch">
+              <input type="checkbox" id="stepupOn" role="switch" aria-labelledby="stepup-title" />
+              <span class="slider" data-ink="pill" data-fill="marker" data-focus><span class="knob" data-ink="circle" data-fill="photo"></span></span>
+            </label>
+          </div>
+          <div class="stepup-extra" hidden>
+            <div class="tabs seg" role="group" aria-label="Step-up type" data-ink="tabs">
+              <button type="button" class="seg-btn active" data-mode="pct" aria-pressed="true" data-ink="fill" data-focus>By %</button>
+              <button type="button" class="seg-btn" data-mode="amt" aria-pressed="false" data-ink="fill" data-focus>By fixed <span class="sym">₹</span></button>
+            </div>
+            <div id="stepPct" class="field tight">
+              <label for="stepup">Annual increase rate</label>
+              <div class="input" data-ink="box" data-pen="pencil" data-invalid data-focus>
+                <input id="stepup" inputmode="decimal" autocomplete="off" value="10" />
+                <span class="unit">%</span>
+              </div>
+            </div>
+            <div id="stepAmtBox" class="field tight" hidden>
+              <label for="stepAmt">Annual increase amount</label>
+              <div class="input money" data-ink="box" data-pen="pencil" data-invalid data-focus>
+                <span class="sym">₹</span>
+                <input id="stepAmt" inputmode="numeric" autocomplete="off" value="1,000" />
+              </div>
+              <p class="words" data-for="stepAmt"></p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label for="stay">Number of years you want to stay invested for</label>
-        <div class="input">
-          <input id="stay" class="em" inputmode="numeric" autocomplete="off" value="15" />
-          <span class="unit">Years</span>
+        <div class="pair">
+          <div class="field">
+            <label for="years">Invest for</label>
+            <div class="input" data-ink="box" data-pen="pencil" data-invalid data-focus>
+              <input id="years" inputmode="numeric" autocomplete="off" value="10" />
+              <span class="unit">years</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="stay">Stay invested for</label>
+            <div class="input" data-ink="box" data-pen="pencil" data-invalid data-focus>
+              <input id="stay" inputmode="numeric" autocomplete="off" value="15" />
+              <span class="unit">years</span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <div class="label-row">
-          <label for="rate">Expected Rate of return (p.a.)</label>
-          <span class="hint">Compounded annually</span>
+        <div class="field">
+          <div class="label-row">
+            <label for="rate">Expected return (p.a.)</label>
+            <span class="muted">compounded yearly</span>
+          </div>
+          <div class="input" data-ink="box" data-pen="pencil" data-invalid data-focus>
+            <input id="rate" inputmode="decimal" autocomplete="off" value="12" />
+            <span class="unit">%</span>
+          </div>
         </div>
-        <div class="input">
-          <input id="rate" inputmode="decimal" autocomplete="off" value="12" />
-          <span class="unit">%</span>
-        </div>
-      </div>
 
-      <p class="error" id="error" hidden></p>
+        <!-- Red pencil never comes alone: an icon and a word -->
+        <p class="error-row" role="alert">
+          <span class="icon" data-ink="cross" aria-hidden="true"></span>
+          <span id="error" hidden></span>
+        </p>
 
-      <button type="submit" class="submit" id="submit">Submit</button>
-    </form>
-
-    <section class="results" id="empty">
-      <div class="empty">
-        <span class="empty-icon">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
-        </span>
-        <p>Enter your investment details above and tap <b>Submit</b> to view your compound growth projection</p>
-      </div>
+        <button type="submit" class="btn primary" id="submit" data-ink="box" data-pen="ink" data-fill="marker" data-focus><span id="submitLabel">Submit</span></button>
+      </form>
     </section>
 
-    <section class="results" id="results" hidden>
-      <div class="res-head">
-        <span class="eyebrow">Investment Breakdown</span>
-        <span class="pill green" id="pctGain"></span>
-      </div>
+    <!-- Right: the answer -->
+    <aside class="out" aria-live="polite">
+      <section class="results" id="empty">
+        <div class="sheet stock-sticky" data-tilt="1.6" data-seed="sticky">
+          <p>Fill in your plan and press <b>Submit</b>. The growth gets sketched right here.</p>
+        </div>
+        <span class="doodle-arrow" data-ink="arrow" aria-hidden="true"></span>
+      </section>
 
-      <div class="maturity">
-        <div class="maturity-top">
-          <span>Total Future Value (Maturity)</span>
-          <span class="pill dark" id="multiple"></span>
-        </div>
-        <div class="maturity-value" id="total"></div>
-        <div class="maturity-words" id="totalWords"></div>
-      </div>
+      <section class="results sheet stock-graph" id="results" data-tilt="0.5" data-seed="graph" hidden>
+        <span class="tape tape-top" aria-hidden="true"></span>
 
-      <div class="split">
-        <div class="tile">
-          <div class="tile-top"><span class="dot gray"></span>Invested Capital<span class="pill gray" id="invPct"></span></div>
-          <div class="tile-value" id="invested"></div>
+        <div class="res-head">
+          <span class="kicker">Maturity value</span>
+          <span class="stamp" data-ink="stamp"><span id="multiple"></span></span>
         </div>
-        <div class="tile green">
-          <div class="tile-top"><span class="dot green"></span>Est. Returns<span class="pill green" id="retPct"></span></div>
-          <div class="tile-value" id="returns"></div>
-        </div>
-      </div>
+        <div class="maturity-value"><span class="hl" data-ink="hi" data-seed="total-hi"><span id="total"></span></span></div>
+        <p class="muted maturity-words" id="totalWords"></p>
+        <p class="gain">That's <span class="circled" data-ink="loop"><b id="pctGain"></b></span> on what you put in.</p>
 
-      <div class="bar"><span class="bar-inv" id="barInv"></span><span class="bar-ret"></span></div>
+        <div class="split">
+          <div class="tile" data-ink="box" data-pen="ink.fine">
+            <div class="tile-top"><span class="swatch hatch" aria-hidden="true"></span>Invested <span class="pct" id="invPct"></span></div>
+            <div class="tile-value" id="invested"></div>
+          </div>
+          <div class="tile" data-ink="box" data-pen="ink.fine">
+            <div class="tile-top"><span class="swatch solid" aria-hidden="true"></span>Returns <span class="pct" id="retPct"></span></div>
+            <div class="tile-value" id="returns"></div>
+          </div>
+        </div>
 
-      <div class="chart-card">
-        <div class="chart-head">
-          <span class="chart-title">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 3h2v16h16v2H3V3zm4 12l4-5 3 3 5-7v9H7z"/></svg>
-            Relative Growth Projection
-          </span>
-          <span class="legend"><i class="lg gray"></i>Invested <i class="lg green"></i>Growth</span>
+        <div class="bar" data-ink="pill" data-pen="ink.fine" aria-hidden="true">
+          <div class="bar-track"><span class="bar-inv hatch" id="barInv"></span><span class="bar-ret"></span></div>
         </div>
-        <svg id="chart" viewBox="0 0 320 120" preserveAspectRatio="none"></svg>
-        <div class="chart-x">
-          <span>Year 0</span><span id="xMid"></span><span id="xEnd"></span>
+
+        <div class="chart-card" data-ink="box" data-pen="ink.fine">
+          <div class="chart-head">
+            <h3 class="chart-title">Growth, year by year</h3>
+            <span class="legend"><i class="swatch hatch" aria-hidden="true"></i>Invested <i class="swatch solid" aria-hidden="true"></i>Value</span>
+          </div>
+          <svg id="chart" role="img" aria-label="Invested amount and portfolio value over time"></svg>
+          <div class="chart-x">
+            <span>Year 0</span><span id="xMid"></span><span id="xEnd"></span>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </aside>
   </main>
 
+  <script src="ink.js"></script>
   <script src="calc.js"></script>
   <script src="script.js"></script>
 </body>
